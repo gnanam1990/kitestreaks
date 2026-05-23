@@ -2,6 +2,13 @@
 
 GitHub-style activity heatmap for any Kite Mainnet address. Tracks daily transaction counts, current/longest streaks, and the busiest day in the last 12 months.
 
+## Deployment
+
+- **Production:** https://kitestreaks.vercel.app
+- **Host:** Vercel (`kitestreaks`)
+- **Status:** production build verified; reads public KiteScan data client-side
+- **Last verified:** 2026-05-23
+
 ## Stack
 
 - Vite 6 + React 19 + TypeScript
