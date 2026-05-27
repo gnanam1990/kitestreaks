@@ -13,11 +13,27 @@ export interface BlockscoutTxList {
 }
 
 const MAINNET_API = "https://kitescan.ai/api/v2";
+const REQUEST_TIMEOUT_MS = 6_500;
 
 async function fetchJson<T>(url: string): Promise<T> {
-  const res = await fetch(url, { headers: { accept: "application/json" } });
-  if (!res.ok) throw new Error(`KiteScan ${res.status}`);
-  return res.json() as Promise<T>;
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(url, {
+      headers: { accept: "application/json" },
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error(`KiteScan ${res.status}`);
+    return res.json() as Promise<T>;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("KiteScan request timed out");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
 }
 
 export async function getAddressTransactions(
