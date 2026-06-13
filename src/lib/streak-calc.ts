@@ -26,16 +26,24 @@ export function calculateStreaks(
   let running = 0;
   let total = 0;
   let mostActive = { date: "", count: 0 };
+  let prevActive: number | null = null;
+  const DAY_MS = 24 * 60 * 60 * 1000;
 
   const sorted = [...daily_counts.entries()].sort(([a], [b]) => a.localeCompare(b));
   for (const [date, count] of sorted) {
     total += count;
     if (count > mostActive.count) mostActive = { date, count };
     if (count > 0) {
-      running++;
+      // The map only contains days with activity, so consecutive entries are
+      // not necessarily consecutive calendar days. Only extend the run when
+      // this active day directly follows the previous one.
+      const day = Date.parse(`${date}T00:00:00Z`);
+      running = prevActive !== null && day - prevActive === DAY_MS ? running + 1 : 1;
       if (running > longest) longest = running;
+      prevActive = day;
     } else {
       running = 0;
+      prevActive = null;
     }
   }
 
